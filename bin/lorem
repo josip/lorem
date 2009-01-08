@@ -10,17 +10,21 @@ type   = args.shift || :paragraphs
 output = Lorem::Base.new(type, number).output
 
 if ARGV[-1] == PASTE_MODIFIER
-  system("lorem #{number} #{type} | pbcopy")
-  puts "Just pasted your request to the clipboard. (only works on osx)"
+  if ENV["KDE_SESSION_VERSION"] == "4"
+    system("qdbus org.kde.klipper /klipper org.kde.klipper.klipper.setClipboardContents \"#{output}\"")
+  else
+    system("lorem #{number} #{type} | pbcopy")
+  end
+  puts "Just pasted your request to the clipboard. (works on osx and KDE 4)"
 else
   puts output
-  
+
   if number == 1 && type == :paragraphs
     puts
     puts "Usage: lorem [number] [type] (ie: lorem 5 paragraphs)"
     puts " - Number defaults to 1 if no parameters given"
     puts " - Type defaults to paragraphs"
-    puts " - If you are on mac osx you can add -p as an argument and it will auto paste to your clipboard."
+    puts " - If you are on mac osx or any other platform with KDE and Klipper installed you can add -p as an argument and it will auto paste to your clipboard."
     puts " - Available Types:"
     Lorem::Base::TYPES.each { |t| puts "   - #{t}" }
     puts
